@@ -14,8 +14,31 @@ def load_rest_data(db):
     dictionary. Each outer key of the dictionary is the name of each restaurant in the database, 
     and each inner key is a dictionary, where the key:value pairs should be the category, 
     building, and rating for the restaurant.
+    {'M-36 Coffee Roasters Cafe': {'category': 'Cafe', 'building': 1101, 'rating': 3.8}, . . . }
     """
-    pass
+
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+ db)
+    cur = conn.cursor()
+
+    d = {}
+    cur.execute('SELECT name, rating FROM restaurants')
+    for c in cur:
+        d[c[0]] = {}
+        d[c[0]]['rating'] = c[1]
+
+    cur.execute('SELECT categories.category, restaurants.name FROM categories JOIN restaurants ON restaurants.category_id = categories.id')
+    for c in cur:
+        d[c[1]]['category'] = c[0]
+
+    cur.execute('SELECT restaurants.name, buildings.building FROM buildings JOIN restaurants ON restaurants.building_id = buildings.id')
+    for c in cur:
+        d[c[0]]['building'] = c[1]
+
+    return d
+
+
+
 
 def plot_rest_categories(db):
     """
