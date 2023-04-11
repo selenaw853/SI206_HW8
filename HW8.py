@@ -16,12 +16,12 @@ def load_rest_data(db):
     building, and rating for the restaurant.
     {'M-36 Coffee Roasters Cafe': {'category': 'Cafe', 'building': 1101, 'rating': 3.8}, . . . }
     """
-
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+ db)
     cur = conn.cursor()
 
     d = {}
+
     cur.execute('SELECT name, rating FROM restaurants')
     for c in cur:
         d[c[0]] = {}
@@ -46,7 +46,21 @@ def plot_rest_categories(db):
     restaurant categories and the values should be the number of restaurants in each category. The function should
     also create a bar chart with restaurant categories and the count of number of restaurants in each category.
     """
-    pass
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+ db)
+    cur = conn.cursor()
+
+    d = {}
+
+    cur.execute('SELECT category FROM categories')
+    for c in cur:
+        d[c[0]] = 0
+
+    cur.execute('SELECT categories.category FROM categories JOIN restaurants ON categories.id = restaurants.category_id')
+    for c in cur:
+        d[c[0]] += 1
+
+    return d
 
 def find_rest_in_building(building_num, db):
     '''
