@@ -60,6 +60,25 @@ def plot_rest_categories(db):
     for c in cur:
         d[c[0]] += 1
 
+    l = list(sorted(d.items(), key = lambda t: t[1]))
+    x = []
+    y = []
+    
+    for item in l:
+        x.append(item[0])
+        y.append(int(item[1]))
+
+    fig, ax = plt.subplots(figsize =(20, 8)) # the disproportionate ratio is the only way I can make the types and the ylabel show ;-;
+
+    ax.barh(x, y)
+    ax.set_title('# of South Ave Restaurant Types')
+    plt.xlabel("# of Type")
+    plt.ylabel("Restaurant Categories")
+    tickpos = [0,1,2,3,4]
+    plt.xticks(tickpos,tickpos)
+    plt.savefig("bargraph.png")
+    plt.show()
+
     return d
 
 def find_rest_in_building(building_num, db):
