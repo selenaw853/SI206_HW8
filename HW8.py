@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import sqlite3
 import unittest
+import numpy as np
 
 def load_rest_data(db):
     """
@@ -87,7 +88,25 @@ def find_rest_in_building(building_num, db):
     restaurant names. You need to find all the restaurant names which are in the specific building. The restaurants 
     should be sorted by their rating from highest to lowest.
     '''
-    pass
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+ db)
+    cur = conn.cursor()
+
+    l = []
+    d = {}
+    cmd = 'SELECT restaurants.name, restaurants.rating FROM restaurants JOIN buildings ON restaurants.building_id = buildings.id WHERE buildings.building = '
+
+    cur.execute(cmd + str(building_num))
+
+    for c in cur:
+        d[c[0]] = float(c[1])
+    
+    sort = list(sorted(d.items(), key = lambda t: t[1], reverse= True))
+    for s in sort:
+        l.append(s[0])
+
+    return l
+    
 
 #EXTRA CREDIT
 def get_highest_rating(db): #Do this through DB as well
@@ -101,7 +120,64 @@ def get_highest_rating(db): #Do this through DB as well
     The second bar chart displays the buildings along the y-axis and their ratings along the x-axis 
     in descending order (by rating).
     """
-    pass
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+ db)
+    cur = conn.cursor()
+    
+    cate_d = {}
+    build_d = {}
+
+    cur.execute('SELECT category FROM categories')
+    for c in cur:
+        cate_d[c[0]] = 0
+
+    for ca in cate_d.items():
+        cate = ca[0]
+        cur.execute(f"SELECT AVG(restaurants.rating) FROM categories JOIN restaurants ON restaurants.category_id = categories.id WHERE categories.category = '{cate}'")
+        for c in cur:
+            cate_d[cate] =float("{:.1f}".format(c[0]))
+    cate_l = list(sorted(cate_d.items(), key = lambda t: t[1]))
+
+    cur.execute('SELECT building FROM buildings')
+    for c in cur:
+        build_d[c[0]] = 0
+
+    for b in build_d.items():
+        build = b[0]
+        cur.execute(f"SELECT AVG(restaurants.rating) FROM buildings JOIN restaurants ON restaurants.building_id = buildings.id WHERE buildings.building = '{build}'")
+        for c in cur:
+            build_d[build] =float("{:.1f}".format(c[0]))
+    build_l = list(sorted(build_d.items(), key = lambda t: t[1]))
+
+    x1 = []
+    y1 = []
+    x2 = []
+    y2 = []
+    for l in cate_l:
+        y1.append(l[1])
+        x1.append(l[0])
+    for b in build_l:
+        y2.append(b[1])
+        x2.append(str(b[0]))
+
+    fig = plt.figure(figsize=(20,10))
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    ax1.barh(x1, y1)
+    ax2.barh(x2, y2)
+    ax1.set_xlim([0,5])
+    ax2.set_xlim([0,5])
+    ax1.set_title('Average Restaurant Ratings by Category')
+    ax1.set_xlabel('Average Rating')
+    ax2.set_xlabel('Average Rating')
+    ax1.set_ylabel('Categories')
+    ax2.set_ylabel('Buildings')
+    ax2.set_title('Average Restaurant Ratings by Building')
+    plt.savefig("xcredit.png")
+    plt.show()
+
+    return [cate_l[len(cate_l) - 1], build_l[len(build_l) - 1]]
+
 
 #Try calling your functions here
 def main():
